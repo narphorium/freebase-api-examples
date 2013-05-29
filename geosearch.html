@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Simple markers</title>
+    <link href="css/default.css" rel="stylesheet">
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script>
+
+var markersArray = [];
+var infoWindowArray = [];
+
+function clearOverlays() {
+  for (var i = 0; i < markersArray.length; i++ ) {
+    markersArray[i].setMap(null);
+  }
+  markersArray = [];
+  for (var i = 0; i < infoWindowArray.length; i++ ) {
+    infoWindowArray[i].setMap(null);
+  }
+  infoWindowArray = [];
+}
+
+function hideInfoWindows() {
+  for (var i = 0; i < infoWindowArray.length; i++ ) {
+    infoWindowArray[i].close();
+  }
+
+}
+
+function showFreebasePlaces(map) {
+  var search_service = 'https://www.googleapis.com/freebase/v1/search';
+  var center = map.getCenter();
+  var radius = (20 - map.getZoom()) * 500;
+  var search_query = '(all type:/travel/tourist_attraction (within radius:' + radius + 'ft lon:' + center.lng() + ' lat:' + center.lat() + '))'
+  var params = {
+    'filter': search_query,
+    'output': '(description geocode)'
+  };
+  $.getJSON(search_service + '?callback=?', params, function(response) {
+      clearOverlays();
+      for (var i=0; i<response['result'].length; i++) {
+        var result = response['result'][i];
+        var geolocation = result['output']['geocode']['/location/location/geolocation'][0];
+        var descriptions = result['output']['description']['wikipedia'];
+        var description = '';
+        if (descriptions != null && descriptions.length > 0) description = descriptions[0].substring(0,200);
+        var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(geolocation['latitude'], geolocation['longitude']),
+            map: map,
+            title: result['name']
+        });
+        markersArray.push(marker);
+
+        var contentString = '<div class="infowindow"><h3>' + result['name'] + '</h3>';
+        contentString += '<p>' + description + '</p>';
+        contentString += '</div>';
+
+        var infowindow = new google.maps.InfoWindow({
+            content: contentString,
+            maxWidth: 300
+        });
+        infoWindowArray.push(infowindow);
+
+        google.maps.event.addListener(marker, 'click', function(marker, infowindow) { return function() {
+          hideInfoWindows();
+          infowindow.open(map, marker);
+        }}(marker, infowindow));
+
+
+      }
+  });
+}
+
+function initialize() {
+  var myLatlng = new google.maps.LatLng(48.8656,2.3211);
+  var mapOptions = {
+    zoom: 14,
+    center: myLatlng,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  }
+  var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+  showFreebasePlaces(map);
+
+  google.maps.event.addListener(map, 'zoom_changed', function() {
+    showFreebasePlaces(map);
+  });
+
+  google.maps.event.addListener(map, "dragend", function() {
+    showFreebasePlaces(map);           
+  });
+
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+    <style>
+      .infowindow {
+        font-family: Arial;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map-canvas"></div>
+  </body>
+</html>

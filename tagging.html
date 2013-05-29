@@ -1,0 +1,60 @@
+<!doctype html>
+ 
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>jQuery UI Autocomplete - Remote JSONP datasource</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/tag-it.min.js" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/flick/jquery-ui.css">
+<link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
+  <style>
+
+  </style>
+</head>
+<body>
+ 
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#myTags").tagit({
+		autocomplete: {
+			delay: 0, 
+			minLength: 2,
+			allowSpaces: true,
+			source: function( request, response ) {
+				$.ajax({
+				  url: "https://www.googleapis.com/freebase/v1/search?callback=?",
+				  dataType: "jsonp",
+				  data: {
+				    query: request.term,
+				    exact: false,
+				    limit: 6,
+				    prefixed: true
+				  },
+				  success: function( data ) {
+				    if (data.result) {
+					    response( $.map( data.result, function( result ) {
+					    	var label = result.name;
+					    	if ('notable' in result) label += " (" + result.notable.name + ")";
+						      return {
+								label: label,
+								value: result.name
+						      }
+					    }));
+				    }
+				  }
+				});
+			}
+		}
+	});
+    });
+</script>
+
+<ul id="myTags">
+    <!-- Existing list items will be pre-added to the tags -->
+</ul>
+ 
+ 
+</body>
+</html>

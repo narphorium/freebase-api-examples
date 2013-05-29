@@ -1,0 +1,105 @@
+<html>  
+  <head>
+    <title>Freebase Suggest Example - Find topics of type /film/director (Movie Director)</title>
+    
+    <link href="http://www.gstatic.com/freebase/suggest/4_2/suggest.min.css" rel="stylesheet" type="text/css">
+    <link href="css/prettify.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="js/prettify.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://www.gstatic.com/freebase/suggest/4_2/suggest.min.js"></script>
+    
+        <style>
+      body {
+        font-family: Arial;
+      }
+      h1 {
+        font-size: 1.7em;
+      }
+      pre.prettyprint {
+        padding: 16px;
+        background: #eee;
+        min-width: 600px;
+        display: inline-block;
+		margin: 0;
+      }
+	  #myinput {
+	    padding: 0.3em 0.4em;
+      font-size: 1.1em;
+      margin: 0 0 20px;
+      width: 600px;
+      color: #36e;
+      border: 1px solid #ccc;
+      border-radius: 0.2em;
+    }
+	  #related {
+		  display: none;
+	  }
+    #related ul {
+      padding: 0;
+      list-style-type: none;
+    }
+    #related li {
+      display: inline-block;
+      padding: 0 0 0 20px;
+      margin: 0.2em 0;
+      background-repeat: no-repeat;
+    }
+    .related_entity {
+      width: 80px;
+      display: inline-block;
+      vertical-align: top;
+      font-size: 0.8em;
+      border: 1px solid #fff;
+      border-radius: 0.2em;
+      padding: 0.2em;
+    }
+    .related_entity:hover {
+      border-color: #ddd;
+    }
+    .related_entity img {
+      margin: 0 0 0.5em 0;
+    }
+    .related_entity a {
+      text-decoration: none;
+      color: black;
+    }
+    </style>
+  </head>
+  <body onload="prettyPrint()">
+    <div id="body">
+      <p><strong>Collection filter:</strong></p>
+      <input id="myinput" type="text" value="">
+      <script type="text/javascript">
+
+      $(function() {
+        $("#myinput").change(function() {
+          var search_service = 'https://www.googleapis.com/freebase/v1/search';
+          var params = {
+            'filter': $('#myinput').val(),
+            'output': '(description)',
+            'limit': 7
+          };
+          $.getJSON(search_service + '?callback=?', params, function(response) {
+              $("#related ul").empty();
+              for (var i=0; i<response['result'].length; i++) {
+                var related_entity = response['result'][i];
+                var list_item = $('<li></li>');
+                var container = $('<div class="related_entity"></div>');
+                list_item.append(container);
+                container.append($('<img src="https://usercontent.googleapis.com/freebase/v1/image' + related_entity['mid'] + '">'));
+                container.append($('<br/><a href="http://freebase.com"' + related_entity['mid'] + ' target="_blank">' + related_entity['name'] + '</a>'));
+                $("#related ul").append(list_item);
+              }
+              $("#related").show();
+          });
+		    });
+        $("#myinput").val("(all type:/film/film)").change();
+      });
+      </script>
+      <div id="related">
+	    <p><strong>Related Entities:</strong></p>
+      <ul></ul>
+	  </div>
+    </div>
+  
+</body></html>

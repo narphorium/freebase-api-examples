@@ -1,0 +1,88 @@
+<html>  
+  <head>
+    <title>Freebase Suggest Example - Find topics of type /film/director (Movie Director)</title>
+    
+    <link href="http://www.gstatic.com/freebase/suggest/4_2/suggest.min.css" rel="stylesheet" type="text/css">
+    <link href="css/prettify.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="js/prettify.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://www.gstatic.com/freebase/suggest/4_2/suggest.min.js"></script>
+    
+        <style>
+      body {
+        font-family: Arial;
+      }
+      h1 {
+        font-size: 1.7em;
+      }
+      pre.prettyprint {
+        padding: 16px;
+        background: #eee;
+        min-width: 600px;
+        display: inline-block;
+		margin: 0;
+      }
+	  #myinput {
+	    width: 200px;
+		padding: 4px 6px;
+		font-size: 0.9em;
+		margin: 0 0 20px;
+      }
+	  #weblinks {
+		  display: none;
+	  }
+    #weblinks ul {
+      padding: 0;
+      list-style-type: none;
+    }
+    #weblinks li {
+      padding: 0 0 0 20px;
+      margin: 0.2em 0;
+      background-repeat: no-repeat;
+    }
+    </style>
+  </head>
+  <body onload="prettyPrint()">
+    <div id="body">
+      <p><strong>Choose an entity:</strong></p>
+      <input id="myinput" type="text">
+      <script type="text/javascript">
+
+      var visible_domains = [
+        'twitter.com',
+        'plus.google.com',
+        'en.wikipedia.org',
+        'www.nytimes.com',
+        'www.nndb.com'
+      ];
+
+      function addLinks(data, property_id) {
+        var links = data.property[property_id]['values'];
+        for (var i=0; i<links.length; i++) {
+          var domain = /http:\/\/([\w\.]+)\//.exec(links[i].value)[1];
+          if (visible_domains.indexOf(domain) >= 0) {
+            $("#weblinks ul").append('<li style="background-image: url(http://www.google.com/s2/favicons?domain=' + domain + ')"><a href="' + links[i].value + '">' + domain + '</a></li>');
+          }
+        }
+      }
+
+      $(function() {
+        $("#myinput").suggest().bind("fb-select", function(e, data) {
+          var topic_service = 'https://www.googleapis.com/freebase/v1/topic';
+          var params = {'filter': '/common/topic'};
+          $.getJSON(topic_service + data.id + '?callback=?', params, function(topic) {
+              $("#weblinks ul").empty();
+              addLinks(topic, '/common/topic/social_media_presence');
+              addLinks(topic, '/common/topic/topic_equivalent_webpage');
+              $("#weblinks").show();
+          });
+		    });
+      });
+      </script>
+      <div id="weblinks">
+	    <p><strong>Weblinks:</strong></p>
+      <ul></ul>
+	  </div>
+    </div>
+  
+</body></html>

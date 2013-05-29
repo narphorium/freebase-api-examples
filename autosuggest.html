@@ -1,0 +1,71 @@
+<html>  
+  <head>
+    <title>Freebase Suggest Example - Find topics of type /film/director (Movie Director)</title>
+    
+    <link href="http://www.gstatic.com/freebase/suggest/4_2/suggest.min.css" rel="stylesheet" type="text/css">
+    <link href="css/prettify.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="js/prettify.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://www.gstatic.com/freebase/suggest/4_2/suggest.min.js"></script>
+    
+    <style>
+    body {
+      font-family: Arial;
+    }
+    h1 {
+      font-size: 1.7em;
+    }
+    pre.prettyprint {
+      padding: 16px;
+      background: #eee;
+      display: inline-block;
+		  margin: 0;
+    }
+	  #myinput1, #myinput2 {
+	    width: 200px;
+  		padding: 4px 6px;
+  		font-size: 0.9em;
+  		margin: 0 0 20px;
+    }
+	  #response1, #response2 {
+		  display: none;
+	  }
+    </style>
+  </head>
+  <body onload="prettyPrint()">
+    <div id="body">
+    <table style="width:100%"><tr><td style="width:50%;vertical-align:top">
+      <p><strong>Music groups:</strong></p>
+      <input id="myinput1" type="text">
+      <script type="text/javascript">
+      $(function() {
+        $("#myinput1").suggest({filter:'(all type:/music/musical_group)'}).bind("fb-select", function(e, data) {
+    			$("#response1 pre").text(JSON.stringify(data, null, '  '));
+    			prettyPrint();
+    			$("#response1").show();
+    		})
+      });
+      </script>
+      <div id="response1">
+	    <p><strong>Response:</strong>
+		  <pre class="prettyprint"></pre></p>
+    </td><td style="width:50%;vertical-align:top">
+      <p><strong>Movies:</strong></p>
+      <input id="myinput2" type="text">
+      <script type="text/javascript">
+      $(function() {
+        $("#myinput2").suggest({filter:'(all type:/film/film)'}).bind("fb-select", function(e, data) {
+          $("#response2 pre").text(JSON.stringify(data, null, '  '));
+          prettyPrint();
+          $("#response2").show();
+        })
+      });
+      </script>
+      <div id="response2">
+      <p><strong>Response:</strong>
+      <pre class="prettyprint"></pre></p>
+    </td></tr></table>
+	  </div>
+    </div>
+  
+</body></html>
